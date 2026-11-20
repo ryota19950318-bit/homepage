@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>語りーず珈琲｜学園祭限定 リハ教員の自家焙煎コーヒースタンド</title>
 <meta name="description" content="リハ教員が提供する自家焙煎珈琲「語りーず珈琲」。学園祭の2日間だけ、本館3階 調理室にオープン。">
 <meta name="theme-color" content="#2A1810">
@@ -10,6 +10,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
 <script>document.documentElement.classList.add('js');</script>
+<script>
+/* スマホでのピンチ操作（拡大・縮小）を無効にする */
+(function () {
+  var stop = function (e) { e.preventDefault(); };
+  // iPhone / iPad（Safari）のピンチ
+  document.addEventListener('gesturestart', stop, { passive: false });
+  document.addEventListener('gesturechange', stop, { passive: false });
+  document.addEventListener('gestureend', stop, { passive: false });
+  // 2本指以上での操作
+  document.addEventListener('touchmove', function (e) {
+    if (e.touches.length > 1 || (typeof e.scale === 'number' && e.scale !== 1)) e.preventDefault();
+  }, { passive: false });
+})();
+</script>
 <style>
 /* =========================================================
    語りーず珈琲 — 学園祭特設サイト
@@ -28,8 +42,8 @@
   --pad:clamp(20px,5vw,72px);
 }
 *,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(var(--hdr) + 12px)}
-body{margin:0;word-break:auto-phrase;overflow-wrap:break-word;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.85;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+html{overflow-x:hidden;overflow-x:clip;touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;scroll-padding-top:calc(var(--hdr) + 12px)}
+body{touch-action:pan-x pan-y;margin:0;word-break:auto-phrase;overflow-wrap:break-word;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.85;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 img{max-width:100%;display:block}
 a{color:inherit}
 button,input,textarea,select{font:inherit;color:inherit}
@@ -123,8 +137,8 @@ body::before{content:"";position:fixed;inset:0;z-index:200;pointer-events:none;o
 
 /* ---------- concept ---------- */
 .concept__grid{display:grid;grid-template-columns:minmax(0,1fr);max-width:900px;gap:clamp(40px,6vw,96px);align-items:center}
-.fill{font-family:var(--serif);font-weight:900;font-size:clamp(18px,1.95vw,28px);line-height:2;letter-spacing:.02em;margin:.6em 0 0;word-break:auto-phrase}
-.fill .c{opacity:.16;transition:opacity .3s ease}
+.fill{font-family:var(--serif);font-weight:900;font-size:clamp(18px,1.95vw,28px);line-height:2;letter-spacing:.02em;margin:.6em 0 0;word-break:auto-phrase;overflow-wrap:anywhere;max-width:100%}
+.fill .c{opacity:.16;transition:opacity .6s ease}
 .fill .c.on{opacity:1}
 .points{list-style:none;margin:clamp(72px,9vw,120px) 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
 .points li{border-top:2px solid var(--ink);padding-top:22px}
@@ -924,25 +938,19 @@ document.querySelectorAll('[data-asset-href]').forEach(function(el){el.setAttrib
   marquee.innerHTML += marquee.innerHTML;
 
   /* ---------- コンセプト：スクロールで文字が濃くなる ---------- */
+  // 1行ずつ区切る（1文字ずつ区切ると、iPhoneのSafariで折り返されずにはみ出すため）
   const fill = $('.js-fill');
   const fillLines = fill.innerHTML.split(/<br\s*\/?>/i).map(h => { const d = document.createElement('div'); d.innerHTML = h; return d.textContent.trim(); });
   fill.textContent = '';
   const fillChars = [];
   fillLines.forEach((line, li) => {
     if (li) fill.appendChild(document.createElement('br'));
-    Array.from(line).forEach(c => {
-      const s = document.createElement('span');
-      s.className = 'c';
-      s.setAttribute('aria-hidden', 'true');
-      s.textContent = c;
-      fill.appendChild(s);
-      fillChars.push(s);
-    });
+    const s = document.createElement('span');
+    s.className = 'c';
+    s.textContent = line;
+    fill.appendChild(s);
+    fillChars.push(s);
   });
-  const fillSr = document.createElement('span');
-  fillSr.className = 'sr-only';
-  fillSr.textContent = fillLines.join('');
-  fill.appendChild(fillSr);
   let fillN = -1;
   if (reduce) fillChars.forEach(s => s.classList.add('on'));
 
